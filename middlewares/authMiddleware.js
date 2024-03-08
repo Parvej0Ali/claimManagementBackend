@@ -6,7 +6,7 @@ exports.authenticateUser = async (req, res, next) => {
   if (!authHeader) {
     return res.status(401).json({ error: 'Unauthorized: No token provided' });
   }
-  if (!authHeader.startsWith('bearer ')) {
+  if (!authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Unauthorized: wrong token provided' });
   }
   const token = authHeader.split(' ')[1];

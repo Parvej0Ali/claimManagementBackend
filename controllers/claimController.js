@@ -7,7 +7,13 @@ const createClaim = async (req, res) => {
     const newClaim = new Claim(req.body);
     // await newClaim.save();
     const user = await User.findById(newClaim.userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
     const policyIndex = user.policies.findIndex(policy => policy.policy.toString() === newClaim.policyId.toString());
+    if (policyIndex == -1) {
+      return res.status(404).json({ message: 'User does not have this policy' });
+    }
     if(newClaim.claimAmount > user.policies[policyIndex].leftAmount){
       newClaim.status = "Rejected"
       // return res.status(404).json({message: 'Claim amount is bigger than left amount'})

@@ -35,11 +35,41 @@ exports.getUserById = async (req, res) => {
   }
 };
 
+// exports.updateUser = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const policy = req.body.policies
+//     const updatedUser = await User.findByIdAndUpdate(id, { $push: { policies: policy } }, { new: true });
+//     // const updatedUser = await User.findByIdAndUpdate(id, req.body, { new: true });
+//     if (!updatedUser) {
+//       return res.status(404).json({ message: 'User not found' });
+//     }
+    
+//     res.json(updatedUser);
+//   } catch (error) {
+//     res.status(400).json({ message: error.message });
+//   }
+// };
 exports.updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const updatedUser = await User.findByIdAndUpdate(id, { $push: { policies: req.body.policies } }, { new: true });
-    // const updatedUser = await User.findByIdAndUpdate(id, req.body, { new: true });
+    const policy = req.body.policies[0]; // Extracting the policy from the request body
+    const existingUser = await User.findById(id);
+
+    // Check if the policy already exists for the user
+    const policyExists = existingUser.policies.some(item => item.policy.equals(policy.policy));
+
+    if (policyExists) {
+      return res.status(400).json({ message: 'Policy already exists for the user' });
+    }
+
+    // Push the policy only if it doesn't already exist
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { $push: { policies: policy } },
+      { new: true }
+    );
+
     if (!updatedUser) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -49,6 +79,7 @@ exports.updateUser = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
 
 exports.deleteUser = async (req, res) => {
   try {
